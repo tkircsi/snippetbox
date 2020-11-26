@@ -10,14 +10,15 @@ import (
 )
 
 type templateData struct {
-	CurrentYear int
-	Snippet     *models.Snippet
-	Snippets    []*models.Snippet
-	Form        *forms.Form
-	Flash       string
+	CurrentYear     int
+	Snippet         *models.Snippet
+	Snippets        []*models.Snippet
+	Form            *forms.Form
+	Flash           string
+	IsAuthenticated bool
 }
 
-func newTamplateCache(dir string) (map[string]*template.Template, error) {
+func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 	pages, err := filepath.Glob(filepath.Join(dir, "*.page.tmpl"))
 	if err != nil {
