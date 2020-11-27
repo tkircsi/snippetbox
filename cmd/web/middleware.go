@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/justinas/nosurf"
+	"github.com/tkircsi/snippetbox/pkg/models"
 )
 
 func secureHeaders(next http.Handler) http.Handler {
@@ -43,6 +46,29 @@ func (app *application) requireAuthentication(next http.Handler) http.Handler {
 		}
 		w.Header().Add("Cache-Control", "no-store")
 		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		exists := app.session.Exists(r, "authID")
+		if !exists {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		user, err := app.users.Get(app.session.GetInt(r, "authID"))
+		if errors.Is(err, models.ErrNoRecord) || !user.Active {
+			app.session.Remove(r, "authID")
+			next.ServeHTTP(w, r)
+			return
+		} else if err != nil {
+			app.serverError(w, err)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), contextKeyIsAuthenticated, true)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
