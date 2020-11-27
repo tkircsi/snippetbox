@@ -47,7 +47,7 @@ func (f *Form) MinLength(field string, d int) {
 		return
 	}
 	if utf8.RuneCountInString(value) < d {
-		f.Errors.Add(field, fmt.Sprintf("Minimum length is %d.", d))
+		f.Errors.Add(field, fmt.Sprintf("This field is too short (minimum is %d characters)", d))
 	}
 }
 
@@ -57,7 +57,7 @@ func (f *Form) MatchesPattern(field string, pattern *regexp.Regexp) {
 		return
 	}
 	if !pattern.MatchString(value) {
-		f.Errors.Add(field, "Invalid field.")
+		f.Errors.Add(field, "This field is invalid")
 	}
 }
 
